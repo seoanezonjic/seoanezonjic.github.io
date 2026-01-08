@@ -868,6 +868,210 @@ h3 {
 						In this way, the List_dir_ tasks will have the specified resources overriding the general resources configured for the workflow.
 						To observe the resource changes, we have to see the generated scripts in each task folder and read the commented section at the sh header.
 					</p>
+
+				<h3> Task execution control </h3>
+					<p>
+						In some cases, we need to execute only a subset of tasks in the workflow bacause we need to update results or due to minor errors that must be fixed.
+						To do so, in addition to use the character % in the tag task name within the template we can use the --white_list and --black_list flags. 
+						These flags use as input string patterns separated by commas to match the task names. 
+						When a white flag is used the tasks that NOT match with the patterns are marked to NOT be executable.
+						In the case of the black flag is used, the tasks that match the patterns are marked to NOT be executable.
+					</p>
+
+					<div class="template">
+						<div class="task">
+							<p>algo){</p>
+								<p style="margin-left:0.5em">? </p>
+								<p style="margin-left:0.5em">echo 'OK' </p>
+							<p>}</p>
+						</div>
+						<div class="task">
+							<p>result){</p>
+								<p style="margin-left:0.5em">? </p>
+								<p style="margin-left:0.5em">echo algo)/file
+								</p>
+							<p>}</p>
+						</div>
+					</div>
+
+					<p> In this example, the task result is marked to be NOT executed because the the white_list flag do NOT match results and therefore is marked to NOT be executed. </p>
+					
+					
+	<div class="code"> autoflow -v -w af_templates/simple.af --white_list alg* </div>
+		<details>
+			<summary class="click-data"> Click to see results</summary>
+			<div class="results">
+				<p> <span style="color:white"> algo > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo 'OK' </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0004 </span> <span style="color:white"> False </span> </p>
+<p style="color:green; margin-left:1em"> 	 </p>
+<p> <span style="color:white"> result > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo exec/echo_0004/file </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0005 </span> <span style="color:white"> True </span> </p>
+<p style="color:green; margin-left:1em"> 	algo </p>
+			</div>
+		</details>
+	
+
+					<p> 
+						In this example, the task result is marked to be executed because the the black_list flag do match algo task and is marked to NOT be executed.
+						We have the opposite behaviour that the previous case.
+					</p>
+					
+					
+	<div class="code"> autoflow -v -w af_templates/simple.af --black_list alg* </div>
+		<details>
+			<summary class="click-data"> Click to see results</summary>
+			<div class="results">
+				<p> <span style="color:white"> algo > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo 'OK' </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0006 </span> <span style="color:white"> True </span> </p>
+<p style="color:green; margin-left:1em"> 	 </p>
+<p> <span style="color:white"> result > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo exec/echo_0006/file </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0004 </span> <span style="color:white"> False </span> </p>
+<p style="color:green; margin-left:1em"> 	algo </p>
+			</div>
+		</details>
+	
+
+				<h3> Advanced AutoFlow variable configuration </h3>
+					<p>
+						In complex workflows we have to deal with a large amount of variables that are hard to set in command line or we need to change to different values according with teh analysis.
+						For this reason, the -V flag to set AutoFlow variables can use path to variable text files.
+						In the following example there is a template that uses the file_name, attribute1 and attribute2 variables with the later two defined in a file:
+					</p>
+					<div class="template">
+						<div class="task">
+							<p>result){</p>
+								<p style="margin-left:0.5em">? </p>
+								<p style="margin-left:0.5em">echo -e "<span style="color:red">$attribute1</span>\t<span style="color:red">$attribute2</span>" > <span style="color:red">$file_name</span></p>
+							<p>}</p>
+						</div>
+					</div>
+
+					<p> Text file with variable definitions, basic_with_vars.var: </p>
+					<div class="code"> 
+						<p> attribute1=exec </p>
+						<p> attribute2=login </p>
+					</div>
+					<p> Using var file with a workflow template: </p>
+					
+					
+	<div class="code"> autoflow -v -w af_templates/basic_with_vars.af -V $file_name=test,af_templates/basic_with_vars.var </div>
+		<details>
+			<summary class="click-data"> Click to see results</summary>
+			<div class="results">
+				<p> <span style="color:white"> result > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo -e "exec\tlogin" > test </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0005 </span> <span style="color:white"> False </span> </p>
+<p style="color:green; margin-left:1em"> 	 </p>
+			</div>
+		</details>
+	
+
+				<h3> Handling resource configuration files </h3>
+					<p>
+						When we have multiple tasks that share computational resources or we need execute with different resources the same workflow, inline or cmd management could be difficult.
+						To deal with this situation, AutoFlow have the option of use resource files in json (wf_with_res_prof.json) format in which we can define task resources profiles with a specific name:
+					</p>
+					<div class="code">
+						<p>{</p>
+							<p style="margin-left:0.5em"> "resources": { </p>
+								<p  style="margin-left:1em"> "test": { </p>
+									<p style="margin-left:1.5em"> "cpu" : 2, </p>
+									<p style="margin-left:1.5em"> "mem" : "300GB", </p>
+									<p style="margin-left:1.5em"> "time" : "7-00:00:00", </p>
+									<p style="margin-left:1.5em"> "node" : "bigmem" </p>
+								<p style="margin-left:1em">} </p>
+							<p style="margin-left:0.5em">} </p>
+						<p>} </p>
+					</div>
+					<p>
+						Then, the workflow template changes the resource line file to -r flag and the resource profile name that is needed for this task:
+					</p>
+
+					<div class="template">
+						<div class="task">
+							<p>algo){</p>
+								<p style="margin-left:0.5em">resources: <span style="color:red">-r test</span> </p>
+								<p style="margin-left:0.5em">? </p>
+								<p style="margin-left:0.5em">echo -e "OK\t<span style="color:red">[cpu]</span>" > log </p>
+							<p>}</p>
+						</div>
+					</div>
+
+					<p>
+						And finally, when we execute the template with the described resource file, we can observe how the cpus are replaced with the number specified in the test profile.
+					</p>
+					
+					
+	<div class="code"> autoflow -v -w af_templates/wf_with_res_prof.af -r af_templates/wf_with_res_prof.json </div>
+		<details>
+			<summary class="click-data"> Click to see results</summary>
+			<div class="results">
+				<p> <span style="color:white"> algo > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo "OK\t2" > log </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0004 </span> <span style="color:white"> False </span> </p>
+<p style="color:green; margin-left:1em"> 	 </p>
+			</div>
+		</details>
+	
+
+				<h3> Handling external workflow dependencies </h3>
+					<p>
+						A workflow executes different software and libraries from programming languages so is needed to get them installed in the Operating System. 
+						If we execute oir worflow in other computer, this software could be not available.
+						For this reason, the resources file could include a virt section that describe the desired method to install the dependencies (mostly trougth virtualization strategies):
+					</p>
+					<div class="code">
+						<p>{</p>
+							<p style="margin-left:0.5em"> "resources": { </p>
+								<p  style="margin-left:1em"> "test": { </p>
+									<p style="margin-left:1.5em"> "cpu" : 2, </p>
+									<p style="margin-left:1.5em"> "mem" : "300GB", </p>
+									<p style="margin-left:1.5em"> "time" : "7-00:00:00", </p>
+									<p style="margin-left:1.5em"> "node" : "bigmem" </p>
+									<p style="margin-left:1.5em"> <b>"virt" : "test_virt" </b> </p>
+									<p style="margin-left:1.5em"> <b>"virt_type" : "env" </b> </p>
+								<p style="margin-left:1em">} </p>
+							<p style="margin-left:0.5em">} </p>
+							<p style="margin-left:0.5em">"virt": { </p>
+								<p style="margin-left:1.5em"> <b>"test_virt"</b> : { </p>
+								<p style="margin-left:2em"> "virt_type" : "env", </p>
+								<p style="margin-left:2em"> "venv_opts" : ["--system-site-packages"], </p>
+								<p style="margin-left:2em"> "requirements": ["cowsay"], </p>
+								<p style="margin-left:2em"> "pip_opts": [] </p>
+								<p style="margin-left:1.5em">} </p>
+							<p style="margin-left:0.5em">} </p>
+
+						<p>} </p>
+					</div>
+
+					<p>Using the previous workflow template, we get the following: </p>
+					
+					
+	<div class="code"> autoflow -v -w af_templates/wf_with_res_prof.af -r af_templates/wf_with_res_prof_virt.json </div>
+		<details>
+			<summary class="click-data"> Click to see results</summary>
+			<div class="results">
+				<p> <span style="color:white"> algo > </span> <span style="color:red"> echo </span> </p>
+<p style="color:yellow; margin-left:1em"> 	echo "OK\t2" > log </p>
+<p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0006 </span> <span style="color:white"> False </span> </p>
+<p style="color:green; margin-left:1em"> 	 </p>
+			</div>
+		</details>
+	
+					<p>
+						The dry execution don't show changes but if the generated sh is inspected, we coul see how to include the loading of python virtual environment.
+						This environment will include all the specified python libraries in the test_virt profile. 
+						This virtualization profile is called by the test resource profile with the key virt and the key virt_type specifies if is a venv, a anaconda environment or singularity image.
+						The test_virt virtualization profile needs the requirements key as a string vector/list of library names (as pip specifications).
+						Also, we can pass options to the creation of the venv using the venv_opts key with a vector/list. 
+						We use --system-site-packages to install only the libraries not in the system to avoid redundancy.
+						Finally when the libraries are installed in the venv with pip, we can use additional options using the pip_opts key.
+					</p>
+
 				</div>
 
 	<h1> flow_logger </h1>
