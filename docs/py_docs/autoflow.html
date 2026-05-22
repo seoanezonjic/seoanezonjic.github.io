@@ -28,13 +28,13 @@
   background-color: #ccc; 
 }
 
-#mynetwork {
+div[id^='mynetwork_'] {
   width: 1000px;
   height: 1000px;
   background-color: #ffffff;
   border: 1px solid lightgray;
   position: relative;
-  float: left;
+  float: left; 
 }
 
 .resizable_img {  
@@ -334,6 +334,39 @@ h3 {
 					The <span style="color:green">green</span> lines (when listed) show the dependencies of the task. This means that the task will not be executed until the tasks it depends on are done. It should have one line with the task name for each dependency needed for the task.
 					</p>
 
+				<h3> Executing on the command line </h3>
+					<p> We'll go through different ways we can execute Autoflow on the command line, taking into account that some of the concepts will be further explained in the next sections. </p>
+					<p> <b> Base command</b>: Once our template is built, the next step is executing the workflow. To do so in a queuing system (which will be the most common case), we only have to indicate the template path with the -w (--workflow) flag and the output path with the -o path. </p>
+					<code> Autoflow -w template_name -o exec </code>
+					<p>  </p>
+					<p> <b> Variables</b>: we can add input values to the variables present in the template straight from the command line with the -V (--Variables) flag. This functionality will enable us to have a general workflow template that we'll be able to personalize in each project just by changing Autoflow's command, without needing to change the template. This concept will be further explained later. </p>
+					<code> Autoflow -w template_name -V '$var1=val1,$var2=val2' </code>
+					<p>  </p>
+					<p> <b> Resources</b>: we can also specify the resources we want on the command line. If we define resources this way, they will be applied in all tasks, although a specific resources setup for a particular task will overwrite the general one. This matter will be further explained as well but an example would be: </p>
+					<code> Autoflow -w template_name -s -n cal -c 1 -t 3-03:53:00 -m 100gb </code>
+					<p>  </p>
+					<p> <b> Verbose mode</b>: briefly explained before, this mode enables us to create the folder structure without executing anything. It is very useful to check everything is right before executing the workflow. To activate this mode, we just have to add the -v (--verbose) flag. This command is particularly useful when combined with flow logger, which we'll explain later. </p>
+					<code> Autoflow -w template_name -v </code>
+					<p>  </p>
+					<p> <b> Local mode</b>: we can execute the workflow in local mode by using -b (--batch) flag. This way, the workflow won't be sent to the queuing system. </p>
+					<code> Autoflow -w template_name -b </code>
+					<p>  </p>
+					<p> <b> Muting the principal command</b>: if we add the -C (--comment_main_command) flag, Autoflow will comment the first line of the task (the one after the '?'), which is the main command. If we did it manually, it would break Autoflow due to it needing that line internally. Doing it this way avoids said problem, allowing partial reexecutions without repeating the main command (which is usually the most computationally requiring one). The rest of the lines in the task can be commented if you don't want to execute some commands. It is not something that you'll use a lot, but it is useful to know about it for developing purposes. </p>
+					<code> Autoflow -w template_name -C </code>
+					<p>  </p>
+					<p> <b> Additional options</b>: We can specify other options from the queuing system with the -A flag (--additional_job_options). </p>
+					<code> Autoflow -w template_name -A "parameter:value" </code>
+					<p>  </p>
+					<p> <b> Pause between submissions</b>. we can establish a waiting time between submissions with the --sleep flag. It is very useful in big workflows, where submitting a great quantity of tasks may cause the queuing system to start rejecting them. </p>
+					<code> Autoflow -w template_name --sleep 0.1 #sleep 0.1 seconds between job submissions </code>
+					<p>  </p>
+					<p> <b> Simbolic folders</b>: The normal directory structure when launching an AutoFlow template is determined by the main command of each task. Depending on how many times that command is executed—which in turn depends on how many tasks use it as their main command and on the iterators of those tasks—the directory will also include a number (for example: cat_0000, cat_0001, etc.). 
+					This creates a problem: if one of the samples is removed from the workflow, or if new samples are added, the structure of these folders will change, but their previous contents will not be deleted. As a result, different executions become mixed together, which interferes with the updated workflow and prevents flow_logger from functioning correctly.
+					To solve this problem, the -L flag has been added. This flag instructs AutoFlow to generate static names, which are then referenced in the usual way through symbolic links. This means that we will see the same directory structure as before, but in reality a more robust underlying structure is being used—one that can withstand these changes. </p>
+					<code> Autoflow -L -w template_name </code>
+					<p>  </p>
+					<p> NOTE: ALL workflows must be executed with the -L flag. </p>
+
 				<h3> Handling iterative tasks </h3>
 					<p> 
 						When we work with workflows, we usually need to repeat one task several times using different parameters, samples, algorithms, etc.
@@ -614,7 +647,7 @@ h3 {
 								<p style="margin-left:0.5em">scan){ </p>
 								<p style="margin-left:1em">?</p>
 								<p style="margin-left:1em">pwd > file</p>
-								<p style="margin-left:0.5em"></p>
+								<p style="margin-left:1em">}</p>
 								<p style="margin-left:0.5em">show_[file;folder]){</p>
 								<p style="margin-left:1em">?</p>
 								<p style="margin-left:1em">echo `cat scan)/file` <span style="color:red">ls_(+)</span> (*)</p>
@@ -712,7 +745,6 @@ h3 {
 <p> <span style="color:white">  get_content_listing </span> <span style="color:red"> > </span> </p>
 <p style="color:yellow; margin-left:1em"> 	wc -l exec/ls_0001/out </p>
 <p style="margin-left:1em"> <span style="color:royalblue"> exec/wc_0001 </span> <span style="color:white"> False </span> </p>
-<p style="color:green; margin-left:1em"> 	Show_list </p>
 <p style="color:green; margin-left:1em"> 	listing </p>
 		</div>
 	</details>
@@ -1137,7 +1169,8 @@ h3 {
 	<details>
 		<summary class="click-data"> Click to see results</summary>
 		<div class="results">
-			<table id="table_0" border="1" class= "table table-info table-striped table-bordered" >
+			
+<table id="table_0" border="1" class= "table table-info table-striped table-bordered" >
     <thead>
    <tr>
                     <th  >Status </th>
@@ -1152,18 +1185,19 @@ h3 {
                     <td  >SUCC </td>
                     <td  >echo_0000 </td>
                     <td  >1 s </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >algo </td>
     </tr>
    <tr>
                     <td  >SUCC </td>
                     <td  >echo_0001 </td>
                     <td  >1 s </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >result </td>
     </tr>
     </tbody>
 </table>
+
 		</div>
 	</details>
 	
@@ -1202,7 +1236,8 @@ h3 {
 	<details>
 		<summary class="click-data"> Click to see results</summary>
 		<div class="results">
-			<table id="table_1" border="1" class= "table table-info table-striped table-bordered" >
+			
+<table id="table_1" border="1" class= "table table-info table-striped table-bordered" >
     <thead>
    <tr>
                     <th  >Status </th>
@@ -1217,18 +1252,19 @@ h3 {
                     <td  >RUN </td>
                     <td  >echo_0000 </td>
                     <td  >- </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >algo </td>
     </tr>
    <tr>
                     <td  >PEND </td>
                     <td  >echo_0001 </td>
                     <td  >- </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >result </td>
     </tr>
     </tbody>
 </table>
+
 		</div>
 	</details>
 	
@@ -1243,7 +1279,8 @@ h3 {
 	<details>
 		<summary class="click-data"> Click to see results</summary>
 		<div class="results">
-			<table id="table_2" border="1" class= "table table-info table-striped table-bordered" >
+			
+<table id="table_2" border="1" class= "table table-info table-striped table-bordered" >
     <thead>
    <tr>
                     <th  >Status </th>
@@ -1258,18 +1295,19 @@ h3 {
                     <td  >ABORT </td>
                     <td  >echo_0000 </td>
                     <td  >- </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >algo </td>
     </tr>
    <tr>
                     <td  >NOT </td>
                     <td  >echo_0001 </td>
                     <td  >- </td>
-                    <td  >1,5K </td>
+                    <td  >1.0K </td>
                     <td  >result </td>
     </tr>
     </tbody>
 </table>
+
 		</div>
 	</details>
 	
