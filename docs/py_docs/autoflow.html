@@ -28,15 +28,6 @@
   background-color: #ccc; 
 }
 
-div[id^='mynetwork_'] {
-  width: 1000px;
-  height: 1000px;
-  background-color: #ffffff;
-  border: 1px solid lightgray;
-  position: relative;
-  float: left; 
-}
-
 .resizable_img {  
   width: 50vw; 
   height: 50vh; 
@@ -263,12 +254,12 @@ h3 {
 						The input data is taken from another subfolder (task) or given by the user to an external data source.
 					</p>
 			
-				<h3> Basic template sintaxis </h3>
+				<h3> Basic template syntax </h3>
 					<div class="template">
 						<div class="task">
 							<p><span style="color:red">List_dir</span>){</p>
-								<p style="margin-left:0.5em"><span style="color:grey">#Initialize:  definir entorno y ejecución de tareas pequeñas </span></p>
-								<p style="margin-left:0.5em">? <span style="color:grey"> #Separador  initialize-main command </span></p>
+								<p style="margin-left:0.5em"><span style="color:grey">#Initialize:  define environment and run small tasks </span></p>
+								<p style="margin-left:0.5em">? <span style="color:grey"> #Separator:  initialize-main command </span></p>
 								<p style="margin-left:0.5em"><span style="color:purple">ls > out </span> </p>
 							<p>}</p>
 						</div>
@@ -276,7 +267,7 @@ h3 {
 						<div class="task">
 							<p><span style="color:red">Show_list</span>){</p>
 								<p style="margin-left:0.5em"><span style="color:grey"> #Initialize </span></p>
-								<p style="margin-left:0.5em">? <span style="color:grey"> #Separador  initialize-main command </span></p>
+								<p style="margin-left:0.5em">? <span style="color:grey"> #Separator  initialize-main command </span></p>
 								<p style="margin-left:0.5em"><span style="color:purple"> cat <span style="color:blue">List_dir)</span>/out </span></p>
 							<p>}</p>
 						</div>
@@ -400,7 +391,7 @@ h3 {
 					</div>
 
 					<p> We would write one task for each one of the items that we are using, <span style="color:green">home, etc </span> and <span style="color:green">var </span> (the iterable items and as a set, we'll call them the iterator).
-					<p> But AutoFlow has specific sintaxis to handle this situation and avoid the code redundance (and to adapt dinamically if the iterator set changes): 
+					<p> But AutoFlow has specific syntax to handle this situation and avoid the code redundance (and to adapt dinamically if the iterator set changes): 
 					<div class="template">
 						<div class="task">
 							<p>List_<span style="color:green">[home;etc;var]</span>){</p>
@@ -439,7 +430,7 @@ h3 {
 
 				<h3> Working with iterative tasks and dependencies </h3>
 					<p> 
-						As we have seen, we could use specific sintaxis to handle repetitive tasks and perform an iterative task. 
+						As we have seen, we could use specific syntax to handle repetitive tasks and perform an iterative task. 
 						But, what about connecting other tasks with this iterative task?.
 						Firstly, it is worth mentioning that there are two posibilities:
 					<p>
@@ -448,7 +439,7 @@ h3 {
 						In the first case (left), we need to perform a new task onto each one of the generated iterative tasks. 
 						Basically, we need to connect a new iterative task with a previous iterative task.
 						The second case (right), we need a single task that collects the results from all the tasks of the iterative task.
-						Each case has a specific sintaxis. In the case of the iterative to iterative tasks:
+						Each case has a specific syntax. In the case of the iterative to iterative tasks:
 					</p>
 					<div class="template">
 						<div class="task">
@@ -537,7 +528,7 @@ h3 {
 
 				<h3> Using static variables in workflow templates </h3>
 					<p>
-						The workflow sintaxis described previously only allows building workflow templates with hardcoded input.
+						The workflow syntax described previously only allows building workflow templates with hardcoded input.
 						To allow dynamic asignation of input paths or parameters we can use AutoFlow static variables:
 					</p>
 					<div class="template">
@@ -555,7 +546,7 @@ h3 {
 						They are string variables so they could contain simple parameters, paths, iterators, full task nodes... anything.
 						But with the given example, we could think that the problem is the same due to the fact that the variable declaration is hardcoded in the template.
 						This is true, but we can use the -V flag to override the template declaration (or simply make the variable declaration because the template lacks of these variable declarations).
-						The sintaxis of the -V flag should be '$VAR1=value1,$VAR2=value2,..':
+						The syntax of the -V flag should be '$VAR1=value1,$VAR2=value2,..':
 					</p>
 
 					
@@ -840,7 +831,7 @@ h3 {
 
 					
 					
-	<div class="code"> autoflow -v -w af_templates/wf_merge_list.af,af_templates/wf_merge_show.af -V $file=List_dir)/out </div>
+	<div class="code"> autoflow -v -w af_templates/wf_merge_list.af,af_templates/wf_merge_show.af -V '$file=List_dir)/out' </div>
 	<details>
 		<summary class="click-data"> Click to see results</summary>
 		<div class="results">
@@ -876,7 +867,7 @@ h3 {
 
 					<p>
 						This way of defining the resources has a limitation: all tasks are set with the same resources.
-						To overcome this, we have a sintaxis to specify resources per task:
+						To overcome this, we have a syntax to specify resources per task:
 					</p>
 
 					<div class="template">
@@ -1036,7 +1027,7 @@ h3 {
 			<p> <span style="color:white">  algo </span> <span style="color:red"> > </span> </p>
 <p style="color:yellow; margin-left:1em"> 	echo "OK\t2" > log </p>
 <p style="margin-left:1em"> <span style="color:royalblue"> exec/echo_0000 </span> <span style="color:white"> False </span> </p>
-<p style="color:white; margin-left:1em"> 	{'cpu': 2, 'mem': '300GB', 'time': '7-00:00:00', 'node': 'bigmem', 'multinode': 0, 'ntask': False, 'additional_job_options': None, 'done': False, 'folder': True, 'buffer': False, 'exec_folder': '/mnt/home/users/pab_001_uma/pedro/dev_py/py_autoflow/tests/cli_examples/exec/echo_0000', 'cpu_asign': 'number', 'virt': 'test_virt', 'virt_type': 'env'} </p>
+<p style="color:white; margin-left:1em"> 	{'cpu': 2, 'mem': '300GB', 'time': '7-00:00:00', 'node': 'bigmem', 'multinode': 0, 'ntask': False, 'additional_job_options': None, 'done': False, 'folder': True, 'buffer': False, 'exec_folder': '/mnt/home/users/bio_267_uma/aestebanm/dev_py/py_autoflow/tests/cli_examples/exec/echo_0000', 'cpu_asign': 'number', 'task_checks': [], 'virt': 'test_virt', 'virt_type': 'env'} </p>
 		</div>
 	</details>
 	
@@ -1328,7 +1319,29 @@ h3 {
 				<h3> How to make controlled task errors  </h3>
 
 					<p>
-						Use bash to execute an exit command if a user condition is not meet TODO.
+						Use bash to execute an exit command if a user-set condition is not met.
+					</p>
+
+					<div class="template">
+						<div class="task">
+							<p><span style="color:red">Touch_file</span>){</p>
+								<p style="margin-left:0.5em"><span style="color:grey">#Initialize:  define environment and execute small tasks </span></p>
+								<p style="margin-left:0.5em">? <span style="color:grey"> #Separator:  initialize-main command </span></p>
+								<p style="margin-left:0.5em">Touch test</p>
+								<p style="margin-left:0.5em"><span style="color:purple">task_check: -c "[ -s test ]" -f "File does not exist" -s "File exists" </span> </p>
+							<p>}</p>
+						</div>
+
+					</div>
+
+					<p>
+						Task_check has three arguments:
+						<ul>
+						<li> <b> -c: </b> Command that will act as the check. It must be written in brackets in order to call the bash test program. This command <b> must </b> be self-contained (must not depend on variables defined in the task), since AutoFlow will attempt to run it whenever your workflow is launched. If the check succeeds, the task completed successfully and therefore will not to be launched again. </li>
+						<li> <b> -f: </b> Message for check failure. Default: "check fail" </li>
+						<li> <b> -s: </b> Message for check success. Default: "check success" </li>
+						</ul>
+
 					</p>
 
 			</div>
